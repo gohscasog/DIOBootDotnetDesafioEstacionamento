@@ -13,10 +13,10 @@ class Program
         Parking lot = new();
 
         // Amostra para teste
-        lot.AddVehicle("abc-1234", DateTime.UtcNow.AddHours(-1.0));
-        lot.AddVehicle("MAC-0420", DateTime.UtcNow.AddHours(-12.0));
-        lot.AddVehicle("SEX-6969", DateTime.UtcNow.AddHours(-24.0));
-        lot.AddVehicle("Cap-0666", DateTime.UtcNow.AddHours(-48.0));
+        lot.AddVehicle("ABC-1D34", DateTime.UtcNow.AddHours(-1.69));
+        lot.AddVehicle("MAC-4A20", DateTime.UtcNow.AddHours(-12.666));
+        lot.AddVehicle("SEX-2A69", DateTime.UtcNow.AddHours(-24.20));
+        lot.AddVehicle("CAP-6C66", DateTime.UtcNow.AddHours(-45.13));
 
         Console.WriteLine();
 
@@ -29,9 +29,10 @@ class Program
             Console.WriteLine("1. Check in");
             Console.WriteLine("2. Remover entrada");
             Console.WriteLine("3. Check out");
-            Console.WriteLine("4. Status");
+            Console.WriteLine("4. Exibir status");
             Console.WriteLine("5. Listar entradas");
-            Console.WriteLine("6. Sair");
+            Console.WriteLine("6. Configurar");
+            Console.WriteLine("7. Sair");
             Console.Write(">");
 
             opcode = int.TryParse(Console.ReadLine(), out int i) ? i : 0;
@@ -42,21 +43,22 @@ class Program
                 switch(opcode)
                 {
                     case 1:
-                        lot.AddVehicle(lot.VerifyPlate(), DateTime.UtcNow);
+                        lot.AddVehicle(lot.ReadPlate(), DateTime.UtcNow);
                         Console.WriteLine("Veículo adicionado com sucesso");
                         break;
                     case 2:
-                        lot.DelVehicle(lot.GetPlate()); 
+                        lot.DelVehicle(lot.CheckPlate()); 
                         Console.WriteLine("Veículo removido com sucesso");
                         break;
                     case 3:
                         {
-                            string plate = lot.GetPlate();
+                            string plate = lot.CheckPlate();
                             double time = Math.Ceiling(lot.GetPeriod(plate));
                             double total = lot.Checkout(plate, time);
 
                             Console.WriteLine($"Período: {time:N0} hora(s)");
-                            Console.WriteLine(
+                            Console.WriteLine
+                            (
                                 $"Valor a pagar: {total.ToString("C2", 
                                 CultureInfo.CreateSpecificCulture("pt-BR"))}"
                             );
@@ -64,12 +66,41 @@ class Program
                         }
                         break;
                     case 4:
-                        lot.GetVehicle(lot.GetPlate());
+                        lot.GetVehicle(lot.CheckPlate());
                         break;
                     case 5:
                         lot.ListVehicles();
                         break;
                     case 6:
+                        Console.WriteLine
+                        (
+                            $"Taxa: {lot.DutyPrice.ToString("C2", 
+                            CultureInfo.CreateSpecificCulture("pt-BR"))}"
+                        );
+                        Console.WriteLine
+                        (
+                            $"Hora: {lot.HourPrice.ToString("C2", 
+                            CultureInfo.CreateSpecificCulture("pt-BR"))}"
+                        );
+                        Console.WriteLine();
+                        Console.WriteLine("Digite o valor e/ou ENTER para continuar");
+                        Console.Write("Taxa: ");
+
+                        if(double.TryParse(Console.ReadLine(), out double duty))
+                        {
+                            lot.DutyPrice = duty;
+                            Console.WriteLine("Valor alterado com sucesso\n");
+                        }
+
+                        Console.Write("Hora: ");
+
+                        if(double.TryParse(Console.ReadLine(), out double hour))
+                        {
+                            lot.HourPrice = hour;
+                            Console.WriteLine("Valor alterado com sucesso\n");
+                        }
+                        break;
+                    case 7:
                         Console.WriteLine("Volte sempre!\n");
                         return;
                     default:
