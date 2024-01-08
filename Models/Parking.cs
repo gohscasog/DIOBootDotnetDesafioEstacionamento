@@ -13,9 +13,37 @@ namespace Project.Models
             this.hour = hour;
         }
 
-        public string VerifyPlate()
+        public double DutyPrice
         {
-            Console.Write("Digite a placa (AAA-0000|AAA-0A00):\n>");
+            get => duty; 
+            set
+            {
+                if(value < 0)
+                {
+                    throw new InvalidDataException();
+                }
+
+                duty = value;
+            }
+        }
+        public double HourPrice
+        {
+            get => hour; 
+            set
+            {
+                if(value < 0)
+                {
+                    throw new InvalidDataException();
+                }
+
+                hour = value;
+            }
+        }
+
+        public string ReadPlate()
+        {
+            Console.WriteLine("Digite a placa (AAA-0000|AAA-0A00):");
+            Console.Write(">");
 
             var plate = Console.ReadLine();
 
@@ -33,41 +61,31 @@ namespace Project.Models
 
             plate = plate.ToUpper();
 
-            // Converte placa Mercosul para antiga
-            if(plate[5] >= 'A' && plate[5] <= 'J')
+            // Converte placa antiga para Mercosul
+            if(plate[5] >= '0' && plate[5] <= '9')
             {
                 char[] c = plate.ToCharArray();
-                c[5] = (char)(c[5] - 17);
+                c[5] = (char)(c[5] + 17);
                 plate = new string(c);
             }
 
-            for(int i = 0; i < 3; i++)
-            {
-                if(plate[i] < 'A' || plate[i] > 'Z')
-                {
-                    return string.Empty;
-                }
-            }
-
-            if(plate[3] != '-')
+            if(
+                plate[3] != '-' ||
+                plate[0] < 'A' || plate[0] > 'Z' || 
+                plate[1] < 'A' || plate[1] > 'Z' || 
+                plate[2] < 'A' || plate[2] > 'Z' || 
+                plate[5] < 'A' || plate[5] > 'J' || 
+                plate[6] < '0' || plate[6] > '9' ||
+                plate[7] < '0' || plate[7] > '9')
             {
                 return string.Empty;
             }
 
-            for(int i = 4; i < plate.Length; i++)
-            {
-                if(plate[i] < '0' || plate[i] > '9')
-                {
-                    return string.Empty;
-                }
-            }
-
             return plate;
         }
-
-        public string GetPlate()
+        public string CheckPlate()
         {
-            string plate = VerifyPlate();
+            string plate = ReadPlate();
 
             if(vehicles.TryGetValue(plate, out var v))
             {
@@ -76,7 +94,6 @@ namespace Project.Models
 
             return string.Empty;
         }
-
         public void AddVehicle(string plate, DateTime time)
         {
             if(plate == string.Empty)
@@ -84,9 +101,8 @@ namespace Project.Models
                 throw new InvalidDataException();
             }
 
-            vehicles.Add(plate.ToUpper(), time);
+            vehicles.Add(plate, time);
         }
-
         public void DelVehicle(string plate)
         {
             if(plate == string.Empty)
@@ -94,9 +110,8 @@ namespace Project.Models
                 throw new KeyNotFoundException();
             }
 
-            vehicles.Remove(plate.ToUpper());
+            vehicles.Remove(plate);
         }
-
         public void GetVehicle(string plate)
         {
             if(plate == string.Empty)
@@ -104,15 +119,14 @@ namespace Project.Models
                 throw new KeyNotFoundException();
             }
 
-            PrintHead();
+            PrintHeader();
 
             Console.WriteLine(
                 $"{plate}\t{vehicles[plate].ToString("dd/MMM HH:mm")}");
         }
-
         public void ListVehicles()
         {
-            PrintHead();
+            PrintHeader();
 
             foreach(var v in vehicles)
             {
@@ -120,18 +134,16 @@ namespace Project.Models
                     $"{v.Key}\t{v.Value.ToString("dd/MMM HH:mm")}");
             }
         }
-
         public double GetPeriod(string plate)
         {
             return (DateTime.UtcNow - vehicles[plate]).TotalHours;
         }
-
         public double Checkout(string plate, double period)
         {
             return period * hour + duty;
         }
 
-        private void PrintHead()
+        void PrintHeader()
         {
             Console.WriteLine("Placa   \tEntrada");
         }
